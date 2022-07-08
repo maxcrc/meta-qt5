@@ -14,6 +14,6 @@ do_install() {
     qmake5_base_do_install
 }
 
-do_install:class-native() {
+do_install_class-native() {
     qmake5_base_native_do_install
 }
