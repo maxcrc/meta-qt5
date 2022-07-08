@@ -1,4 +1,4 @@
-LICENSE = "BSD & ( GPL-3.0 & The-Qt-Company-GPL-Exception-1.0 ) & ( GPL-2.0+ | LGPL-3.0 ) | The-Qt-Company-Commercial"
+LICENSE = "BSD-3-Clause & ( GPL-3.0-only & The-Qt-Company-GPL-Exception-1.0 ) & ( GPL-2.0-or-later | LGPL-3.0-only ) | The-Qt-Company-Commercial"
 LIC_FILES_CHKSUM = " \
     file://LICENSE.GPL2;md5=b234ee4d69f5fce4486a80fdaf4a4263 \
     file://LICENSE.GPL3;md5=d32239bcb673463ab874e80d47fae504 \
@@ -11,20 +11,20 @@ require qt5-git.inc
 
 DEPENDS += "qtbase qtdeclarative qtremoteobjects-native"
 
-# Patches from https://github.com/meta-qt5/qtremoteobjects/commits/b5.13
-# 5.13.meta-qt5.1
+# Patches from https://github.com/meta-qt5/qtremoteobjects/commits/b5.15
+# 5.15.meta-qt5.1
 SRC_URI += " \
     file://0001-Allow-a-tools-only-build.patch \
     file://0002-cmake-Use-OE_QMAKE_PATH_EXTERNAL_HOST_BINS.patch \
 "
 
 PACKAGECONFIG ??= ""
-PACKAGECONFIG_class-native ??= "tools-only"
-PACKAGECONFIG_class-nativesdk ??= "tools-only"
+PACKAGECONFIG:class-native ??= "tools-only"
+PACKAGECONFIG:class-nativesdk ??= "tools-only"
 PACKAGECONFIG[tools-only] = "CONFIG+=tools-only"
 
 EXTRA_QMAKEVARS_PRE += "${PACKAGECONFIG_CONFARGS}"
 
-SRCREV = "44d51ea7b45b2dce1b6772217269a4d1dff88a80"
+SRCREV = "d0a3719da2797efd95d90043ad2ba4572a2a8533"
 
 BBCLASSEXTEND += "native nativesdk"

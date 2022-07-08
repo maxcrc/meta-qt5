@@ -1,7 +1,7 @@
 require qt5.inc
 require qt5-git.inc
 
-LICENSE = "GFDL-1.3 & BSD & ( GPL-3.0 & The-Qt-Company-GPL-Exception-1.0 | The-Qt-Company-Commercial ) & ( GPL-2.0+ | LGPL-3.0 | The-Qt-Company-Commercial )"
+LICENSE = "GFDL-1.3 & BSD-3-Clause & ( GPL-3.0-only & The-Qt-Company-GPL-Exception-1.0 | The-Qt-Company-Commercial ) & ( GPL-2.0-or-later | LGPL-3.0-only | The-Qt-Company-Commercial )"
 LIC_FILES_CHKSUM = " \
     file://LICENSE.FDL;md5=6d9f2a9af4c8b8c3c769f6cc1b6aaf7e \
     file://LICENSE.GPL2;md5=b234ee4d69f5fce4486a80fdaf4a4263 \
@@ -17,12 +17,12 @@ PACKAGECONFIG[bluez] = "CONFIG+=OE_BLUEZ_ENABLED,,bluez5"
 
 EXTRA_QMAKEVARS_PRE += "${PACKAGECONFIG_CONFARGS}"
 
-do_configure_prepend() {
+do_configure:prepend() {
     # disable bluez test if it isn't enabled by PACKAGECONFIG
     sed -i 's/^    qtCompileTest(bluez)/    OE_BLUEZ_ENABLED:qtCompileTest(bluez)/g' ${S}/qtsystems.pro
 }
 
-do_install_append() {
+do_install:append() {
     # Remove example.pro file as it is useless
     rm -f ${D}${OE_QMAKE_PATH_EXAMPLES}/examples.pro	
 }
@@ -30,3 +30,7 @@ do_install_append() {
 QT_MODULE_BRANCH = "dev"
 
 SRCREV = "e3332ee38d27a134cef6621fdaf36687af1b6f4a"
+
+SRC_URI += " \
+    file://0001-qtsystems-install-files-only-once.patch \
+"

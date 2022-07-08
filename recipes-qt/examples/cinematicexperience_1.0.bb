@@ -19,15 +19,17 @@ S = "${WORKDIR}/Qt5_CinematicExperience_rpi_${PV}"
 #S = "${WORKDIR}/Qt5_CinematicExperience_${PV}/"
 
 DEPENDS = "qtdeclarative qtgraphicaleffects"
-RDEPENDS_${PN} = "liberation-fonts qtdeclarative-qmlplugins qtgraphicaleffects-qmlplugins"
+RDEPENDS:${PN} = "liberation-fonts qtdeclarative-qmlplugins qtgraphicaleffects-qmlplugins"
 
 require recipes-qt/qt5/qt5.inc
 
 do_install() {
-    install -d ${D}${datadir}/${P}
-    install -m 0755 ${B}/Qt5_CinematicExperience ${D}${datadir}/${P}
-    cp -R --no-dereference --preserve=mode,links ${S}/content ${D}${datadir}/${P}
-    install -m 0644 ${S}/Qt5_CinematicExperience.qml ${D}${datadir}/${P}
+    install -d ${D}${datadir}/${P}/content/ ${D}${datadir}/${P}/content/images/
+    install -m 0755 ${B}/Qt5_CinematicExperience ${D}${datadir}/${P}/Qt5_CinematicExperience
+    install -m 0644 ${S}/content/*.qml ${D}${datadir}/${P}/content/
+    install -m 0644 ${S}/content/images/*.png ${D}${datadir}/${P}/content/images/
+    install -m 0644 ${S}/content/images/*.xcf ${D}${datadir}/${P}/content/images/
+    install -m 0644 ${S}/Qt5_CinematicExperience.qml ${D}${datadir}/${P}/Qt5_CinematicExperience.qml
 
     install -d ${D}${bindir}
     echo "#!/bin/sh" > ${D}${bindir}/Qt5_CinematicExperience
@@ -37,4 +39,4 @@ do_install() {
     chmod +x ${D}${bindir}/Qt5_CinematicExperience
 }
 
-FILES_${PN} += "${datadir}"
+FILES:${PN} += "${datadir}"

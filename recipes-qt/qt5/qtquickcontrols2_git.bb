@@ -1,7 +1,7 @@
 require qt5.inc
 require qt5-git.inc
 
-LICENSE = "GFDL-1.3 & BSD & LGPL-3.0 | GPL-3.0 | The-Qt-Company-Commercial"
+LICENSE = "GFDL-1.3 & BSD-3-Clause & LGPL-3.0-only | GPL-3.0-only | The-Qt-Company-Commercial"
 LIC_FILES_CHKSUM = " \
     file://LICENSE.FDL;md5=6d9f2a9af4c8b8c3c769f6cc1b6aaf7e \
     file://LICENSE.LGPLv3;md5=382747d0119037529ec2b98b24038eb0 \
@@ -10,4 +10,6 @@ LIC_FILES_CHKSUM = " \
 
 DEPENDS += "qtdeclarative qtdeclarative-native"
 
-SRCREV = "c0fb745acdbed0828e3b66f6a6705203a2754591"
+SRC_URI += "file://0001-Revert-Get-the-scale-of-the-popup-item-when-setting-.patch"
+
+SRCREV = "83cbcc244ac1c1cf65c8b407e0fd905f9d3a41ac"

@@ -1,7 +1,9 @@
 require qt5.inc
 require qt5-git.inc
 
-LICENSE = "BSD & LGPLv2+ | GPL-2.0"
+inherit pkgconfig
+
+LICENSE = "BSD-3-Clause & LGPL-2.0-or-later | GPL-2.0-only"
 LIC_FILES_CHKSUM = " \
     file://LICENSE.LGPLv21;md5=58a180e1cf84c756c29f782b3a485c29 \
     file://Source/JavaScriptCore/parser/Parser.h;endline=21;md5=bd69f72183a7af673863f057576e21ee \
@@ -16,46 +18,65 @@ SRC_URI += "\
     file://0002-Fix-build-with-non-glibc-libc-on-musl.patch \
     file://0003-Fix-build-bug-for-armv32-BE.patch \
     file://0004-PlatformQt.cmake-Do-not-generate-hardcoded-include-p.patch \
+    file://0005-Fix-build-with-bison37.patch \
+    file://0006-Disable-code-related-to-HTTP-2-when-Qt-is-configured.patch \
+    file://0007-Fix-compilation-with-Python-3.9-avoid-passing-encodi.patch \
+    file://0008-Fix-build-with-icu-68.patch \
+    file://0009-Riscv-Add-support-for-riscv.patch \
+    file://mips-atomic.patch \
 "
 
-inherit cmake_qt5 perlnative pythonnative
+SRC_URI:append:riscv32 = " file://0010-webdriver-libatomic.patch "
+SRC_URI:append:riscv64 = " file://0010-webdriver-libatomic.patch "
+
+inherit cmake_qt5 perlnative
+
+inherit python3native
 
 # qemuarm build fails with:
 # | {standard input}: Assembler messages:
 # | {standard input}:106: Error: invalid immediate: 983040 is out of range
 # | {standard input}:106: Error: value of 983040 too large for field of 2 bytes at 146
-ARM_INSTRUCTION_SET_armv4 = "arm"
-ARM_INSTRUCTION_SET_armv5 = "arm"
+ARM_INSTRUCTION_SET:armv4 = "arm"
+ARM_INSTRUCTION_SET:armv5 = "arm"
 
 # https://bugzilla.yoctoproject.org/show_bug.cgi?id=9474
 # https://bugs.webkit.org/show_bug.cgi?id=159880
 # JSC JIT can build on ARMv7 with -marm, but doesn't work on runtime.
 # Upstream only tests regularly the JSC JIT on ARMv7 with Thumb2 (-mthumb).
-ARM_INSTRUCTION_SET_armv7a = "thumb"
-ARM_INSTRUCTION_SET_armv7r = "thumb"
-ARM_INSTRUCTION_SET_armv7ve = "thumb"
+ARM_INSTRUCTION_SET:armv7a = "thumb"
+ARM_INSTRUCTION_SET:armv7r = "thumb"
+ARM_INSTRUCTION_SET:armv7ve = "thumb"
 
 # http://errors.yoctoproject.org/Errors/Details/179245/
 # just use -fpermissive in this case like fedora did:
 # https://bugzilla.redhat.com/show_bug.cgi?id=1582954
 CXXFLAGS += "-fpermissive"
+CXXFLAGS += "${@bb.utils.contains('DISTRO_FEATURES', 'x11', '', '-DEGL_NO_X11=1', d)}"
 
 EXTRA_OECMAKE += " \
     -DPORT=Qt \
     -DCROSS_COMPILE=ON \
+    -DCMAKE_BUILD_TYPE=release \
     -DECM_MKSPECS_INSTALL_DIR=${libdir}${QT_DIR_NAME}/mkspecs/modules \
     -DQML_INSTALL_DIR=${OE_QMAKE_PATH_QML} \
+    -DPYTHON_EXECUTABLE=`which python3` \
 "
 
-EXTRA_OECMAKE_append_toolchain-clang = " -DCMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES:PATH='${STAGING_INCDIR}'"
+EXTRA_OECMAKE:append:toolchain-clang = " -DCMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES:PATH='${STAGING_INCDIR}'"
 
-# JIT not supported on MIPS/PPC
-EXTRA_OECMAKE_append_mipsarch = " -DENABLE_JIT=OFF -DENABLE_C_LOOP=ON "
-EXTRA_OECMAKE_append_powerpc = " -DENABLE_JIT=OFF -DENABLE_C_LOOP=ON "
+# JIT not supported on MIPS/PPC/RISCV
+EXTRA_OECMAKE:append:mipsarch = " -DENABLE_JIT=OFF -DUSE_SYSTEM_MALLOC=ON -DENABLE_C_LOOP=ON "
+EXTRA_OECMAKE:append:powerpc = " -DENABLE_JIT=OFF -DUSE_SYSTEM_MALLOC=ON -DENABLE_C_LOOP=ON "
+EXTRA_OECMAKE:append:powerpc64le = " -DENABLE_JIT=OFF -DUSE_SYSTEM_MALLOC=ON -DENABLE_C_LOOP=ON "
+EXTRA_OECMAKE:append:riscv64 = " -DENABLE_JIT=OFF -DUSE_SYSTEM_MALLOC=ON -DENABLE_C_LOOP=ON "
+
 # Disable gold on mips64/clang
 # mips64-yoe-linux-musl-ld.gold: internal error in get_got_page_offset, at ../../gold/mips.cc:6260
 # mips-yoe-linux-musl-ld.gold: error: Can't find matching LO16 reloc
-EXTRA_OECMAKE_append_toolchain-clang_mipsarch = " -DUSE_LD_GOLD=OFF "
+EXTRA_OECMAKE:append:mipsarch = " -DUSE_LD_GOLD=OFF "
+EXTRA_OECMAKE:append:powerpc = " -DUSE_LD_GOLD=OFF "
+EXTRA_OECMAKE:append:riscv64 = " -DUSE_LD_GOLD=OFF "
 
 PACKAGECONFIG ??= "qtlocation qtmultimedia qtsensors qtwebchannel \
     ${@bb.utils.filter('DISTRO_FEATURES', 'x11', d)} \
@@ -75,8 +96,8 @@ PACKAGECONFIG[fontconfig] = "-DENABLE_TEST_SUPPORT=ON,-DENABLE_TEST_SUPPORT=OFF,
 PACKAGECONFIG[hyphen] = "-DUSE_LIBHYPHEN=ON,-DUSE_LIBHYPHEN=OFF,hyphen"
 
 # remove default ${PN}-examples* set in qt5.inc, because they conflicts with ${PN} from separate webkit-examples recipe
-PACKAGES_remove = "${PN}-examples"
+PACKAGES:remove = "${PN}-examples"
 
-QT_MODULE_BRANCH = "dev"
+QT_MODULE_BRANCH = "5.212"
 
-SRCREV = "ab1bd15209abaf7effc51dbc2f272c5681af7223"
+SRCREV = "10cd6a106e1c461c774ca166a67b8c835c755ef7"

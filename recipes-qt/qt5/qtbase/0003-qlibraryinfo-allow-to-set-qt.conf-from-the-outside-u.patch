@@ -1,4 +1,4 @@
-From 4ec7f7cb5b8779e50af4a3fe282e02f225f13ddf Mon Sep 17 00:00:00 2001
+From 31a126a7e5e08fe1d3ba84639d2121453a71606f Mon Sep 17 00:00:00 2001
 From: Holger Freyther <zecke@selfish.org>
 Date: Wed, 26 Sep 2012 17:22:30 +0200
 Subject: [PATCH] qlibraryinfo: allow to set qt.conf from the outside using the
@@ -20,10 +20,10 @@ Signed-off-by: Martin Jansa <Martin.Jansa@gmail.com>
  1 file changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/src/corelib/global/qlibraryinfo.cpp b/src/corelib/global/qlibraryinfo.cpp
-index f2ada4ab30..62c6feae17 100644
+index 8ceb763491..ea102f788d 100644
 --- a/src/corelib/global/qlibraryinfo.cpp
 +++ b/src/corelib/global/qlibraryinfo.cpp
-@@ -174,7 +174,10 @@ void QLibrarySettings::load()
+@@ -183,7 +183,10 @@ void QLibrarySettings::load()
  QSettings *QLibraryInfoPrivate::findConfiguration()
  {
  #ifdef QT_BUILD_QMAKE

@@ -1,6 +1,6 @@
 DESCRIPTION = "QmlLive is a live reloader environment for rapid UI development"
 HOMEPAGE = "https://github.com/qtproject/qt-apps-qmllive"
-LICENSE = "GPL-3.0"
+LICENSE = "GPL-3.0-only"
 LIC_FILES_CHKSUM = "file://LICENSE.GPL3;md5=75cd0dbc6f2d24e7eeb128ff59b74f4c"
 DEPENDS = "qtbase qtdeclarative"
 
@@ -18,4 +18,4 @@ inherit pkgconfig qmake5
 EXTRA_QMAKEVARS_PRE += "LIB_ARCH=${@d.getVar('baselib').replace('lib', '')}"
 EXTRA_QMAKEVARS_POST = "QMAKE_RPATHDIR="
 
-FILES_${PN}-dev += "${datadir}"
+FILES:${PN}-dev += "${datadir}"

@@ -1,10 +1,12 @@
 require qt5.inc
 require qt5-git.inc
 
-DEPENDS += "qtbase qtdeclarative wayland wayland-native qtwayland-native"
-DEPENDS_append_class-target = " libxkbcommon"
+inherit pkgconfig
 
-LICENSE = "GFDL-1.3 & BSD & ( GPL-3.0 & The-Qt-Company-GPL-Exception-1.0 | The-Qt-Company-Commercial ) & ( GPL-2.0+ | LGPL-3.0 | The-Qt-Company-Commercial )"
+DEPENDS += "qtbase qtdeclarative wayland wayland-native qtwayland-native"
+DEPENDS:append:class-target = " libxkbcommon"
+
+LICENSE = "GFDL-1.3 & BSD-3-Clause & ( GPL-3.0-only & The-Qt-Company-GPL-Exception-1.0 | The-Qt-Company-Commercial ) & ( GPL-2.0-or-later | LGPL-3.0-only | The-Qt-Company-Commercial )"
 LIC_FILES_CHKSUM = " \
     file://LICENSE.LGPL3;md5=e6a600fd5e1d9cbde2d983680233ad02 \
     file://LICENSE.GPL2;md5=b234ee4d69f5fce4486a80fdaf4a4263 \
@@ -13,24 +15,27 @@ LIC_FILES_CHKSUM = " \
     file://LICENSE.FDL;md5=6d9f2a9af4c8b8c3c769f6cc1b6aaf7e \
 "
 
-SRC_URI += " \
-    file://0001-tst_seatv4-Include-array.patch \
-    file://0002-Fix-compilation-of-linuxdmabuf-compositor-plugin.patch \
-    file://0003-Client-really-use-OpenGL-ES-2-API-for-decoration-bli.patch \
-"
+# Patches from https://github.com/meta-qt5/qtwayland/commits/b5.15
+# 5.15.meta-qt5.1
+SRC_URI += "file://0001-tst_seatv4-Include-array.patch \
+            file://0001-linux-dmabuf-unstable-v1-Include-missing-array-heade.patch \
+            file://0001-Fix-vulkan-buffer-formats-for-GLES2.patch \
+            file://0001-qwaylandinputcontext-Include-missing-header-locale.h.patch \
+           "
 
 PACKAGECONFIG ?= " \
     wayland-client \
     wayland-server \
-    wayland-egl \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'opengl wayland', 'wayland-egl', '', d)} \
     ${@bb.utils.contains('DISTRO_FEATURES', 'x11', 'xcomposite-egl xcomposite-glx', '', d)} \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'vulkan', 'wayland-vulkan-server-buffer', '', d)} \
 "
-PACKAGECONFIG_class-native ?= ""
-PACKAGECONFIG_class-nativesdk ?= ""
-QMAKE_PROFILES_class-native = "${S}/src/qtwaylandscanner"
-QMAKE_PROFILES_class-nativesdk = "${S}/src/qtwaylandscanner"
-B_class-native = "${SEPB}/src/qtwaylandscanner"
-B_class-nativesdk = "${SEPB}/src/qtwaylandscanner"
+PACKAGECONFIG:class-native ?= ""
+PACKAGECONFIG:class-nativesdk ?= ""
+QMAKE_PROFILES:class-native = "${S}/src/qtwaylandscanner"
+QMAKE_PROFILES:class-nativesdk = "${S}/src/qtwaylandscanner"
+B:class-native = "${SEPB}/src/qtwaylandscanner"
+B:class-nativesdk = "${SEPB}/src/qtwaylandscanner"
 
 PACKAGECONFIG[wayland-client] = "-feature-wayland-client,-no-feature-wayland-client"
 PACKAGECONFIG[wayland-server] = "-feature-wayland-server,-no-feature-wayland-server"
@@ -40,13 +45,14 @@ PACKAGECONFIG[wayland-egl] = "-feature-wayland-egl,-no-feature-wayland-egl,virtu
 PACKAGECONFIG[wayland-brcm] = "-feature-wayland-brcm,-no-feature-wayland-brcm,virtual/egl"
 PACKAGECONFIG[wayland-drm-egl-server-buffer] = "-feature-wayland-drm-egl-server-buffer,-no-feature-wayland-drm-egl-server-buffer,libdrm virtual/egl"
 PACKAGECONFIG[wayland-libhybris-egl-server-buffer] = "-feature-wayland-libhybris-egl-server-buffer,-no-feature-wayland-libhybris-egl-server-buffer,libhybris"
+PACKAGECONFIG[wayland-vulkan-server-buffer] = "-feature-wayland-vulkan-server-buffer,-no-feature-wayland-vulkan-server-buffer,vulkan-headers"
 
 EXTRA_QMAKEVARS_CONFIGURE += "${PACKAGECONFIG_CONFARGS}"
 
-SRCREV = "615aa208d131ab99e967725504fcb16fdda4ea83"
+SRCREV = "f1e6c8764d187e9c1c642f6b11020ea513822cd1"
 
 BBCLASSEXTEND =+ "native nativesdk"
 
 # The same issue as in qtbase:
 # http://errors.yoctoproject.org/Errors/Details/152641/
-LDFLAGS_append = "${@bb.utils.contains('DISTRO_FEATURES', 'ld-is-gold', ' -fuse-ld=bfd ', '', d)}"
+LDFLAGS:append = "${@bb.utils.contains('DISTRO_FEATURES', 'ld-is-gold', ' -fuse-ld=bfd ', '', d)}"

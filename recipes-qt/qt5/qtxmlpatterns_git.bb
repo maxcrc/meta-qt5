@@ -3,7 +3,7 @@ require qt5-git.inc
 require qt5-ptest.inc
 
 HOMEPAGE = "http://www.qt.io"
-LICENSE = "GFDL-1.3 & BSD & ( GPL-3.0 & The-Qt-Company-GPL-Exception-1.0 | The-Qt-Company-Commercial ) & ( GPL-2.0+ | LGPL-3.0 | The-Qt-Company-Commercial )"
+LICENSE = "GFDL-1.3 & BSD-3-Clause & ( GPL-3.0-only & The-Qt-Company-GPL-Exception-1.0 | The-Qt-Company-Commercial ) & ( GPL-2.0-or-later | LGPL-3.0-only | The-Qt-Company-Commercial )"
 LIC_FILES_CHKSUM = " \
     file://LICENSE.LGPL3;md5=e6a600fd5e1d9cbde2d983680233ad02 \
     file://LICENSE.GPL2;md5=b234ee4d69f5fce4486a80fdaf4a4263 \
@@ -15,17 +15,16 @@ LIC_FILES_CHKSUM = " \
 DEPENDS += "qtbase"
 
 PACKAGECONFIG ?= ""
-PACKAGECONFIG_class-target ?= "qtdeclarative"
+PACKAGECONFIG:class-target ?= "qtdeclarative"
 PACKAGECONFIG[qtdeclarative] = ",,qtdeclarative"
 
-do_configure_prepend() {
+do_configure:prepend() {
     # disable qtdeclarative test if it isn't enabled by PACKAGECONFIG
     sed -e 's/qtHaveModule(qml)/OE_QTDECLARATIVE_ENABLED/' -i ${S}/src/src.pro
 }
 
 EXTRA_QMAKEVARS_PRE += "${@bb.utils.contains('PACKAGECONFIG', 'qtdeclarative', 'CONFIG+=OE_QTDECLARATIVE_ENABLED', '', d)}"
 
-SRCREV = "74c5be960cbd4709cd8e4dee897cf53c00838128"
+SRCREV = "82a7136a7caece13767c3b2808b2aad9d3d79dd3"
 
 BBCLASSEXTEND =+ "native nativesdk"
-
