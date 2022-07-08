@@ -75,7 +75,6 @@ COMPATIBLE_MACHINE_aarch64 = "(.*)"
 inherit qmake5
 inherit gettext
 inherit perlnative
-inherit features_check
 
 
 # Static builds of QtWebEngine aren't supported.
